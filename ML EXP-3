@@ -1,0 +1,86 @@
+1	import pandas as pd
+2	import numpy as np
+3	import seaborn as sns
+4	import matplotlib.pyplot as plt
+5	from sklearn.datasets import load_iris
+6	from sklearn.model_selection import train_test_split
+7	from sklearn.tree import DecisionTreeClassifier, plot_tree
+8	from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, roc_auc_score, roc_curve, cohen_kappa_score, prec
+9
+10	# Load the Iris dataset
+11	iris = load_iris()
+12	X = iris.data
+13	y = iris.target
+14
+15	# Split the data into training and testing sets
+16	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 17
+18	# Train the Decision Tree classifier using the Gini Index
+19	clf = DecisionTreeClassifier(criterion='gini', random_state=42)
+20	clf.fit(X_train, y_train)
+21
+22	# Predict the target variable on the testing set
+23	y_pred = clf.predict(X_test)
+24
+25	# Evaluate the classifier's performance
+26	conf_matrix = confusion_matrix(y_test, y_pred)
+27	print("Confusion Matrix:\n", conf_matrix)
+28
+29	# Plot the Confusion Matrix
+30	sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=iris.target_names, yticklabels=iris.target_names)
+31	plt.xlabel('Predicted')
+32	plt.ylabel('Actual')
+33	plt.title('Confusion Matrix')
+34	plt.show()
+35
+36	print("Classification Report:\n", classification_report(y_test, y_pred))
+37	accuracy = accuracy_score(y_test, y_pred)
+38	print(f"Accuracy: {accuracy}")
+39
+40	# Calculate and interpret the Kappa Statistics
+41	kappa = cohen_kappa_score(y_test, y_pred)
+42	print(f"Kappa Statistics: {kappa}")
+43
+44	# Calculate Sensitivity, Specificity, Precision, Recall, and F-measure for each class
+45	precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average=None)
+46	sensitivity = recall  # Sensitivity is the same as recall for each class
+47	specificity = [conf_matrix[i, i] / sum(conf_matrix[:, i]) for i in range(len(conf_matrix))]
+48
+49	# Macro average
+50	macro_precision = np.mean(precision)
+51	macro_recall = np.mean(recall)
+52	macro_f1 = np.mean(f1)
+53	macro_specificity = np.mean(specificity)
+54
+55	print(f"Sensitivity (Recall): {sensitivity}")
+56	print(f"Specificity: {specificity}")
+57	print(f"Precision: {precision}")
+58	print(f"F-measure: {f1}")
+59
+60	print(f"Macro Precision: {macro_precision}")
+61	print(f"Macro Recall: {macro_recall}")
+62	print(f"Macro F1: {macro_f1}")
+63	print(f"Macro Specificity: {macro_specificity}")
+64
+65	# Plot the Decision Tree
+66	plt.figure(figsize=(20,10))
+67	plot_tree(clf, filled=True, feature_names=iris.feature_names, class_names=iris.target_names)
+68	plt.show()
+69
+70	# ROC Curve and AUC
+71	y_prob = clf.predict_proba(X_test)
+72	roc auc = roc auc score(y test y prob multi class='ovo')
+72	roc_auc  roc_auc_score(y_test, y_prob, multi_class ovo )
+73	print(f"AUC: {roc_auc}")
+74	# For multiclass ROC curve, we need to plot ROC curve for each class separately
+75	fpr = {}
+76	tpr = {}
+77	for i in range(3):
+78	fpr[i], tpr[i], _ = roc_curve(y_test, y_prob[:, i], pos_label=i)
+79	plt.plot(fpr[i], tpr[i], label=f"Class {i} ROC Curve")
+80
+81	plt.xlabel('False Positive Rate')
+82	plt.ylabel('True Positive Rate')
+83	plt.title('ROC Curve')
+84	plt.legend()
+85	plt.show()
+86 
